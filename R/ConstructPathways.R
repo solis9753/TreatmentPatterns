@@ -71,6 +71,7 @@ constructPathways <- function(dataSettings, pathwaySettings, saveSettings) {
     minPostCombinationDuration <-  as.integer(pathwaySettings[pathwaySettings$param == "minPostCombinationDuration",s]) 
     filterTreatments <-  pathwaySettings[pathwaySettings$param == "filterTreatments",s]
     maxPathLength <- as.integer(pathwaySettings[pathwaySettings$param == "maxPathLength",s])
+    postIndexObservationPeriod <- as.integer(pathwaySettings[pathwaySettings$param == "postIndexObservationPeriod", s])
     
     # Select subset of full cohort including only data for the current target cohort
     select_people <- full_cohorts$person_id[full_cohorts$cohort_id == targetCohortId]
@@ -79,7 +80,8 @@ constructPathways <- function(dataSettings, pathwaySettings, saveSettings) {
     if (nrow(current_cohorts) != 0) {
       
       # Preprocess the target/event cohorts to create treatment history
-      treatment_history <- doCreateTreatmentHistory(current_cohorts, targetCohortId, eventCohortIds, periodPriorToIndex, includeTreatments)
+      treatment_history <- doCreateTreatmentHistory(current_cohorts, targetCohortId, eventCohortIds, periodPriorToIndex, includeTreatments, 
+                                                    postIndexObservationPeriod = postIndexObservationPeriod)
       
       # Apply pathway settings to create treatment pathways
       ParallelLogger::logInfo("Construct treatment pathways, this may take a while for larger datasets.")
@@ -131,7 +133,7 @@ constructPathways <- function(dataSettings, pathwaySettings, saveSettings) {
         counts_targetcohort <- data.table::rollup(targetCohort, .N, by = c("index_year"))
         counts_targetcohort$index_year <- paste0("Number of persons in target cohort ", counts_targetcohort$index_year)
         
-        counts_pathways <- rollup(treatment_pathways, sum(freq), by = c("index_year"))
+        counts_pathways <- data.table::rollup(treatment_pathways, sum(freq), by = c("index_year"))
         counts_pathways$index_year <- paste0("Number of pathways (before minCellCount) in ", counts_pathways$index_year)
         
         colnames(counts_pathways) <- colnames(counts_targetcohort)
@@ -155,7 +157,7 @@ constructPathways <- function(dataSettings, pathwaySettings, saveSettings) {
 # includeTreatments Include treatments starting ('startDate') or ending ('endDate') after target cohort start date
 #
 # Output: Updated dataframe, including only event cohorts after target cohort start date and with added index year, duration, gap same columns.
-doCreateTreatmentHistory <- function(current_cohorts, targetCohortId, eventCohortIds, periodPriorToIndex, includeTreatments) {
+doCreateTreatmentHistory <- function(current_cohorts, targetCohortId, eventCohortIds, periodPriorToIndex, includeTreatments, postIndexObservationPeriod = NULL) {
   
   # Add index year column based on start date target cohort
   targetCohort <- current_cohorts[current_cohorts$cohort_id %in% targetCohortId,,]
@@ -174,6 +176,11 @@ doCreateTreatmentHistory <- function(current_cohorts, targetCohortId, eventCohor
   } else {
     warning("includeTreatments input incorrect, return all event cohorts ('includeTreatments')")
     current_cohorts <- current_cohorts[current_cohorts$start_date.y - as.difftime(periodPriorToIndex, unit="days") <= current_cohorts$start_date.x & current_cohorts$start_date.x < current_cohorts$end_date.y,]
+  }
+  
+  # Post index observation period
+  if (!is.null(postIndexObservationPeriod)){
+    current_cohorts <- current_cohorts[current_cohorts$start_date.x <= current_cohorts$start_date.y + postIndexObservationPeriod]
   }
   
   # Remove unnecessary columns

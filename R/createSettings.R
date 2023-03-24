@@ -288,7 +288,8 @@ addPathwaySettings <- function(studyName = "name_unknown", # c("default")
                                minCellCount = 5,
                                minCellMethod = "Remove",
                                groupCombinations = 10,
-                               addNoPaths = FALSE) {
+                               addNoPaths = FALSE, 
+                               postIndexObservationPeriod = NULL) {
   
   if (!length(targetCohortId)>0 | !is.numeric(targetCohortId)) {
     stop("targetCohortId should be numeric value")
@@ -319,7 +320,8 @@ addPathwaySettings <- function(studyName = "name_unknown", # c("default")
                          minCellCount = minCellCount,
                          minCellMethod = minCellMethod,
                          groupCombinations = groupCombinations,
-                         addNoPaths = addNoPaths)    
+                         addNoPaths = addNoPaths, 
+                         postIndexObservationPeriod = postIndexObservationPeriod)    
   
   return(settings)
 }
