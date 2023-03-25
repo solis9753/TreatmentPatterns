@@ -85,7 +85,7 @@ constructPathways <- function(dataSettings, pathwaySettings, saveSettings) {
       
       # Apply pathway settings to create treatment pathways
       ParallelLogger::logInfo("Construct treatment pathways, this may take a while for larger datasets.")
-      writeLines(paste0("Original number of rows: ", nrow(treatment_history)))
+      # writeLines(paste0("Original number of rows: ", nrow(treatment_history)))
       
       # TODO: check what happens if treatment_history zero or few rows (throw errors)
       
@@ -178,9 +178,12 @@ doCreateTreatmentHistory <- function(current_cohorts, targetCohortId, eventCohor
     current_cohorts <- current_cohorts[current_cohorts$start_date.y - as.difftime(periodPriorToIndex, unit="days") <= current_cohorts$start_date.x & current_cohorts$start_date.x < current_cohorts$end_date.y,]
   }
   
+  writeLines(paste0("Original number of rows: ", nrow(current_cohorts)))
+  
   # Post index observation period
   if (!is.null(postIndexObservationPeriod)){
     current_cohorts <- current_cohorts[current_cohorts$start_date.x <= current_cohorts$start_date.y + postIndexObservationPeriod]
+    message(paste0("After filtering events within the desired post index period (", postIndexObservationPeriod, "), the remaining lines are ", nrow(current_cohorts), "."))
   }
   
   # Remove unnecessary columns
