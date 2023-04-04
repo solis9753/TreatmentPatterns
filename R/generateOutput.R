@@ -45,8 +45,8 @@ generateOutput <- function(saveSettings) {
     
     if (!is.null(treatment_pathways)) {
       # Compute percentage of people treated with each event cohort separately and in the form of combination treatments
-      outputTreatedPatients(data = treatment_pathways[[1]], eventCohortIds = eventCohortIds, groupCombinations = TRUE, outputFolder = saveSettings$outputFolder, outputFile = file.path(outputFolder_s, paste0(saveSettings$databaseName, "_", studyName,"_percentage_groups_treated_noyear.csv")))
-      outputTreatedPatients(data = treatment_pathways[[2]], eventCohortIds = eventCohortIds, groupCombinations = TRUE, outputFolder = saveSettings$outputFolder, outputFile = file.path(outputFolder_s, paste0(saveSettings$databaseName, "_", studyName, "_percentage_groups_treated_withyear.csv")))
+      outputTreatedPatients(data = treatment_pathways[[1]], eventCohortIds = eventCohortIds, groupCombinations = groupCombinations, outputFolder = saveSettings$outputFolder, outputFile = file.path(outputFolder_s, paste0(saveSettings$databaseName, "_", studyName,"_percentage_groups_treated_noyear.csv")))
+      outputTreatedPatients(data = treatment_pathways[[2]], eventCohortIds = eventCohortIds, groupCombinations = groupCombinations, outputFolder = saveSettings$outputFolder, outputFile = file.path(outputFolder_s, paste0(saveSettings$databaseName, "_", studyName, "_percentage_groups_treated_withyear.csv")))
       
       # Duration of era's
       outputDurationEras(outputFolder = saveSettings$outputFolder, tempFolder = saveSettings$tempFolder, databaseName = saveSettings$databaseName, studyName = studyName, eventCohortIds = eventCohortIds, groupCombinations = TRUE, minCellCount = minCellCount)
